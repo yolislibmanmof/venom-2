@@ -133,6 +133,7 @@ $venom_role     = htmlspecialchars($_SESSION['nname'] ?? __('Librarian'), ENT_QU
     ], JSON_UNESCAPED_SLASHES) ?>;
     </script>
     <script type="text/javascript" src="<?php echo $venom_turl; ?>/js/venom.js?v=<?php echo $venom_asset('js/venom.js'); ?>"></script>
+    <script type="text/javascript" src="<?php echo $venom_turl; ?>/js/venom-particles.js?v=<?php echo $venom_asset('js/venom-particles.js'); ?>"></script>
     <style>
         :root { --v-accent: <?= $venom_accent ?>; }
         #sidepan .scroll-content, #vNav .scroll-content { padding: 0; }

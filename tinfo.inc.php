@@ -92,6 +92,14 @@ $venom_options = [
         'default' => $sysconf['admin_template']['always_show_tracks'] ?? 1,
         'data'    => [[1, __('Yes')], [0, __('No')]],
     ],
+
+        'particles' => [
+        'dbfield' => 'venom_particles',
+        'label'   => __('Background Particle Effect'),
+        'type'    => 'dropdown',
+        'default' => $sysconf['admin_template']['venom_particles'] ?? 1,
+        'data'    => [[1, __('Yes')], [0, __('No')]],
+    ],
 ];
 
 // Daftar untuk folder 'venom' DAN theme aktif (kompatibel dgn theme.php & sysconfig).
