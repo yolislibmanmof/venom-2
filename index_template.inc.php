@@ -30,7 +30,7 @@ $venom_idle    = (int)($venom_at['venom_idle'] ?? 1);
 $venom_tracks  = (int)($venom_at['always_show_tracks'] ?? 1);
 $venom_timeout = (int)($sysconf['session_timeout'] ?? 7200);
 $venom_turl    = $sysconf['admin_template']['dir'] . '/' . $sysconf['admin_template']['theme'];
-$venom_ver     = '1.0.0';
+$venom_ver     = '1.3.0';
 $venom_initmode = $venom_mode === 'auto' ? 'dark' : $venom_mode;
 ?>
 <!doctype html>
