@@ -1,8 +1,15 @@
 /**
  * ============================================================
- *  VENOM UX ENGINE v1.3.0 — GANTI TOTAL js/venom.js
+ *  VENOM UX ENGINE v1.3.2 — FINAL
  *  Core v1.2 + bell v2 + favorit + katalog palette +
  *  cheatsheet (?) + preset accent topbar.
+ *
+ *  v1.3.2 (hasil audit):
+ *  - filter sidebar & blok favorit sadar wrapper .scroll-content
+ *  - idle habis hitungan -> logout.php (janji UI ditepati)
+ *  - ikon disesuaikan Font Awesome 4.2.0 yang dibundel
+ *  - renderFavs sinkronkan tinggi scrollbar
+ *  - fallback API pakai C.turl (folder-agnostik, case-safe)
  * ============================================================
  */
 (function () {
@@ -31,7 +38,7 @@
 
   var SRC = ''; try { SRC = (document.currentScript && document.currentScript.src) || ''; } catch (e) {}
   if (!SRC) { var ss = qs('script[src*="/venom.js"]'); SRC = ss ? ss.src : ''; }
-  var API = SRC ? SRC.replace(/\/js\/venom\.js(\?.*)?$/, '/api.php') : ((C.awb || '') + 'admin_template/venom/api.php');
+  var API = SRC ? SRC.replace(/\/js\/venom\.js(\?.*)?$/, '/api.php') : ((C.awb || '') + (C.turl || 'admin_template/venom') + '/api.php');
 
   /* ---------- THEME ---------- */
   var theme = {
@@ -108,12 +115,12 @@
     [/authority|rules|loan_rule|aturan/i, 'fa-gavel'], [/subject|topic|label/i, 'fa-tags'],
     [/gmd|collection|type/i, 'fa-th-large'], [/publisher/i, 'fa-building'],
     [/place|location|map/i, 'fa-map-marker'], [/language/i, 'fa-language'],
-    [/freq|serial|kardex/i, 'fa-newspaper-o'], [/holiday|calendar/i, 'fa-calendar-check-o'],
+    [/freq|serial|kardex/i, 'fa-newspaper-o'], [/holiday|calendar/i, 'fa-calendar'],
     [/report|recap|statistic|pelapor/i, 'fa-bar-chart'], [/chart|graph/i, 'fa-pie-chart'],
     [/log|history|recent|sejarah/i, 'fa-history'], [/user|librarian|staff|profil/i, 'fa-user'],
     [/group|privilege|module/i, 'fa-cubes'], [/backup|database|mysql/i, 'fa-database'],
     [/theme|template|tema/i, 'fa-paint-brush'], [/content|news/i, 'fa-file-text'],
-    [/plugin/i, 'fa-plug'], [/env|server|node|ucs/i, 'fa-server'],
+    [/plugin/i, 'fa-plug'], [/env|server|node|ucs/i, 'fa-hdd-o'],
     [/mail|notif/i, 'fa-envelope'], [/currency|price/i, 'fa-money'],
     [/shortcut/i, 'fa-bolt'], [/stock|inventaris/i, 'fa-tasks'], [/print|receipt/i, 'fa-print'],
     [/popular|top/i, 'fa-fire'], [/system|config|setting|misc|pemintas/i, 'fa-cog'],
@@ -163,13 +170,15 @@
 
   /* ---------- FAVORITES UI ---------- */
   var favsBox = null;
+  function syncNavScroll() { if (window.VenomScrollbar && window.VenomScrollbar.update) window.VenomScrollbar.update(); }
   function renderFavs() {
     if (!favsBox) return;
     var favs = getFavs();
-    if (!favs.length) { favsBox.hidden = true; favsBox.innerHTML = ''; return; }
+    if (!favs.length) { favsBox.hidden = true; favsBox.innerHTML = ''; syncNavScroll(); return; }
     favsBox.hidden = false;
     favsBox.innerHTML = '<div class="v-favs-title"><i class="fa fa-star"></i>' + L('Favorites', 'Favorit') + '</div>' +
       favs.slice(0, 8).map(f => '<a class="v-fav-row" data-h="' + esc(f.h) + '" data-m="' + esc(f.m || '') + '" data-t="' + esc(f.t) + '"><i class="fi fa ' + esc(f.i || 'fa-angle-right') + '"></i><span>' + esc(f.t) + '</span><button type="button" class="v-fav-star on" data-h="' + esc(f.h) + '" title="' + L('Unpin', 'Lepas pin') + '"><i class="fa fa-star"></i></button></a>').join('');
+    syncNavScroll();
   }
   function refreshFavUI() {
     qsa('#sidepan .v-nav a.subMenuItem').forEach(function (a) {
@@ -243,7 +252,8 @@
     safe(function () {
       var nav = qs('#vNav'); if (!nav) return;
       favsBox = document.createElement('div'); favsBox.id = 'vFavs'; favsBox.hidden = true;
-      nav.insertBefore(favsBox, nav.firstChild);
+      var vNavContent = qs('.scroll-content', nav) || nav;
+      vNavContent.insertBefore(favsBox, vNavContent.firstChild);
       qsa('a.subMenuItem', nav).forEach(function (a) {
         var span = qs('span', a); if (!span) return;
         if (!a.dataset.vIcon) { a.dataset.vIcon = '1'; var i = document.createElement('i'); i.className = 'fa ' + iconFor(a.getAttribute('href')); a.insertBefore(i, a.firstChild); }
@@ -268,7 +278,7 @@
     });
 
     /* NAV FILTER */
-    safe(function () { var input = qs('#vNavFilter'), nav = qs('#vNav'), empty = qs('.v-nav-empty'); if (!input || !nav) return; function apply() { var term = input.value.trim().toLowerCase(), any = false, header = null, headerHas = false; Array.prototype.forEach.call(nav.children, function (el) { if (el.id === 'vFavs') return; if (el.classList.contains('subMenuHeader')) { if (header) header.classList.toggle('v-hide', !headerHas); header = el; headerHas = false; return; } if (el.classList.contains('subMenuItem')) { var span = qs('span', el); var hit = !term || (span && span.textContent.toLowerCase().indexOf(term) !== -1); el.classList.toggle('v-hide', !hit); if (hit) { any = true; headerHas = true; } } }); if (header) header.classList.toggle('v-hide', !headerHas); if (empty) empty.hidden = any || !term; if (window.VenomScrollbar && window.VenomScrollbar.update) window.VenomScrollbar.update(); } input.addEventListener('input', apply); input.addEventListener('keydown', e => { if (e.key === 'Escape') { input.value = ''; apply(); input.blur(); } }); Venom.focusFilter = function () { input.focus(); input.select(); }; });
+    safe(function () { var input = qs('#vNavFilter'), nav = qs('#vNav'), empty = qs('.v-nav-empty'); if (!input || !nav) return; function apply() { var term = input.value.trim().toLowerCase(), any = false, header = null, headerHas = false; Array.prototype.forEach.call((qs('.scroll-content', nav) || nav).children, function (el) { if (el.id === 'vFavs') return; if (el.classList.contains('subMenuHeader')) { if (header) header.classList.toggle('v-hide', !headerHas); header = el; headerHas = false; return; } if (el.classList.contains('subMenuItem')) { var span = qs('span', el); var hit = !term || (span && span.textContent.toLowerCase().indexOf(term) !== -1); el.classList.toggle('v-hide', !hit); if (hit) { any = true; headerHas = true; } } }); if (header) header.classList.toggle('v-hide', !headerHas); if (empty) empty.hidden = any || !term; if (window.VenomScrollbar && window.VenomScrollbar.update) window.VenomScrollbar.update(); } input.addEventListener('input', apply); input.addEventListener('keydown', e => { if (e.key === 'Escape') { input.value = ''; apply(); input.blur(); } }); Venom.focusFilter = function () { input.focus(); input.select(); }; });
 
     /* CRUMBS */
     safe(function () { var cur = qs('#sidepan .v-nav a.curModuleLink span'); setCrumb(cur ? cur.textContent.trim() : L('Overview', 'Ringkasan')); document.addEventListener('click', function (e) { var a = e.target.closest && e.target.closest('#sidepan a.subMenuItem'); if (!a) return; if (e.target.closest('.v-fav-star')) return; var span = qs('span', a); if (!span) return; setCrumb(span.textContent.trim()); pushRecent({ t: span.textContent.trim(), h: a.getAttribute('href'), m: moduleHref() }); }); if ($) $(document).on('simbioAJAXloaded', debounce(function () { var cur = qs('#sidepan .v-nav a.curModuleLink span'); if (cur) setCrumb(cur.textContent.trim()); }, 90)); });
@@ -314,7 +324,7 @@
         var base = q ? baseItems.map(it => ({ it: it, s: score(it, q) })).filter(x => x.s > 0).sort((a, b) => b.s - a.s).map(x => x.it)
           : baseItems.filter(it => it.g !== MEN).concat(baseItems.filter(it => it.g === MEN).slice(0, 6));
         comp = comp.concat(base).slice(0, 16); active = 0;
-        if (!comp.length) { list.innerHTML = '<div class="v-palette-empty"><i class="fa fa-ghost"></i> ' + L('Nothing matched.', 'Tidak ada yang cocok.') + '</div>'; list._shown = []; return; }
+        if (!comp.length) { list.innerHTML = '<div class="v-palette-empty"><i class="fa fa-search"></i> ' + L('Nothing matched.', 'Tidak ada yang cocok.') + '</div>'; list._shown = []; return; }
         var html = '', lastG = '';
         comp.forEach(function (it, idx) {
           if (it.g !== lastG) { html += '<div class="v-palette-group">' + esc(it.g) + '</div>'; lastG = it.g; }
@@ -424,7 +434,7 @@
     });
 
     /* IDLE */
-    safe(function () { var box = qs('#vIdle'); if (!C.idle || !box || !C.timeout || C.timeout < 300) return; var count = qs('#vIdleCount'), stay = qs('#vIdleStay'), out = qs('#vIdleOut'); var last = Date.now(), shown = false, limit = C.timeout * 1000, warnAt = limit - 120000; ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart'].forEach(ev => window.addEventListener(ev, debounce(() => { if (!shown) last = Date.now(); }, 4000), { passive: true })); setInterval(function () { var idle = Date.now() - last; if (!shown && idle >= warnAt) { shown = true; box.hidden = false; } if (shown) { var left = Math.max(0, Math.ceil((limit - idle) / 1000)); if (count) count.textContent = left; if (left <= 0) location.assign('index.php'); } }, 1000); if (stay) stay.addEventListener('click', () => { fetch(window.location.href, { method: 'HEAD', credentials: 'same-origin', cache: 'no-store' }).catch(() => {}).finally(() => { last = Date.now(); shown = false; box.hidden = true; }); }); if (out) out.addEventListener('click', () => location.assign('logout.php')); });
+    safe(function () { var box = qs('#vIdle'); if (!C.idle || !box || !C.timeout || C.timeout < 300) return; var count = qs('#vIdleCount'), stay = qs('#vIdleStay'), out = qs('#vIdleOut'); var last = Date.now(), shown = false, limit = C.timeout * 1000, warnAt = limit - 120000; ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart'].forEach(ev => window.addEventListener(ev, debounce(() => { if (!shown) last = Date.now(); }, 4000), { passive: true })); setInterval(function () { var idle = Date.now() - last; if (!shown && idle >= warnAt) { shown = true; box.hidden = false; } if (shown) { var left = Math.max(0, Math.ceil((limit - idle) / 1000)); if (count) count.textContent = left; if (left <= 0) location.assign('logout.php'); } }, 1000); if (stay) stay.addEventListener('click', () => { fetch(window.location.href, { method: 'HEAD', credentials: 'same-origin', cache: 'no-store' }).catch(() => {}).finally(() => { last = Date.now(); shown = false; box.hidden = true; }); }); if (out) out.addEventListener('click', () => location.assign('logout.php')); });
 
     /* ENHANCER + FRAMES */
     safe(function () { if ($) { $(document).on('simbioAJAXloaded', debounce(() => { enhance(); localize(); }, 80)); $(document).on('cbox_complete cbox_load', () => { scanFrames(qs('#cboxLoadedContent') || document); setTimeout(() => scanFrames(qs('#cboxLoadedContent') || document), 250); }); } var mc = qs('#mainContent'); if (mc && window.MutationObserver) new MutationObserver(debounce(() => scanFrames(mc), 120)).observe(mc, { childList: true, subtree: true }); scanFrames(document); enhance(); });

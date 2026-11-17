@@ -4,8 +4,13 @@
  *  VENOM — Premium Admin Template for SLiMS 9 (Bulian)
  *  Shell admin. Kontrak runtime SAMA PERSIS dengan template default:
  *  - urutan CSS/JS core, #mainMenu/#sidepan/#mainContent/.loader/#help
- *  - iframe blindSubmit, include "chat.php", echo $page_footer
- *    (berisi script simbioAJAX pemuat modul — JANGAN DIHILANGKAN)
+ *  - iframe blindSubmit, include "chat.php",
+ *    echo $sysconf['page_footer'] (berisi script simbioAJAX pemuat
+ *    modul yang ditempel admin/index.php — JANGAN DIHILANGKAN)
+ *
+ *  v1.3.2 (hasil audit): ikon FA 4.2.0, escape nama user,
+ *  boot accent anti-FOUC, cache-buster filemtime aset venom,
+ *  kunci config 'turl' untuk fallback API.
  * ============================================================
  */
 
@@ -30,8 +35,16 @@ $venom_idle    = (int)($venom_at['venom_idle'] ?? 1);
 $venom_tracks  = (int)($venom_at['always_show_tracks'] ?? 1);
 $venom_timeout = (int)($sysconf['session_timeout'] ?? 7200);
 $venom_turl    = $sysconf['admin_template']['dir'] . '/' . $sysconf['admin_template']['theme'];
-$venom_ver     = '1.3.0';
+$venom_ver     = '1.3.2';
 $venom_initmode = $venom_mode === 'auto' ? 'dark' : $venom_mode;
+
+/* Cache-buster aset venom: berubah hanya saat file diubah (bukan tiap detik). */
+$venom_asset = function ($rel) use ($venom_ver) {
+    $t = @filemtime(__DIR__ . '/' . $rel);
+    return $t ? $t : $venom_ver;
+};
+$venom_realname = htmlspecialchars($_SESSION['realname'] ?? '', ENT_QUOTES, 'UTF-8');
+$venom_role     = htmlspecialchars($_SESSION['nname'] ?? __('Librarian'), ENT_QUOTES, 'UTF-8');
 ?>
 <!doctype html>
 <html lang="<?= substr($sysconf['default_lang'] ?? 'en_US', 0, 2) ?>">
@@ -66,7 +79,7 @@ $venom_initmode = $venom_mode === 'auto' ? 'dark' : $venom_mode;
     <link href="<?php echo JWB; ?>toastr/toastr.min.css?<?php echo date('this') ?>" rel="stylesheet" type="text/css" />
     <link href="<?php echo JWB; ?>jquery.imgareaselect/css/imgareaselect-default.css" rel="stylesheet" type="text/css" />
     <link href="<?php echo JWB; ?>datepicker/css/datepicker-bs4.min.css" rel="stylesheet" />
-    <link href="<?php echo $sysconf['admin_template']['css'].'?v='.date('this'); ?>" rel="stylesheet" type="text/css" />
+    <link href="<?php echo $sysconf['admin_template']['css'].'?v='.$venom_asset('style.css'); ?>" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" type="text/css" href="<?php echo JWB; ?>/croppie/croppie.css"/>
 
     <!-- ===== CORE JS (urutan default, jangan diubah) ===== -->
@@ -116,9 +129,10 @@ $venom_initmode = $venom_mode === 'auto' ? 'dark' : $venom_mode;
         'user'    => $_SESSION['realname'] ?? '',
         'library' => $sysconf['library_name'] ?? 'SLiMS',
         'awb'     => AWB, 'swb' => SWB, 'mwb' => MWB,
+        'turl'    => $venom_turl,
     ], JSON_UNESCAPED_SLASHES) ?>;
     </script>
-    <script type="text/javascript" src="<?php echo $venom_turl; ?>/js/venom.js?v=<?php echo date('this') ?>"></script>
+    <script type="text/javascript" src="<?php echo $venom_turl; ?>/js/venom.js?v=<?php echo $venom_asset('js/venom.js'); ?>"></script>
     <style>
         :root { --v-accent: <?= $venom_accent ?>; }
         #sidepan .scroll-content, #vNav .scroll-content { padding: 0; }
@@ -139,6 +153,8 @@ $venom_initmode = $venom_mode === 'auto' ? 'dark' : $venom_mode;
         var r = localStorage.getItem(k + 'rail');
         if (r === '1') document.body.classList.add('v-rail');
         if (r === '0') document.body.classList.remove('v-rail');
+        var a = localStorage.getItem(k + 'accent');
+        if (a && /^#[0-9a-fA-F]{6}$/.test(a)) document.documentElement.style.setProperty('--v-accent', a);
     } catch (e) {}
 })();
 </script>
@@ -196,13 +212,13 @@ $venom_initmode = $venom_mode === 'auto' ? 'dark' : $venom_mode;
                     $user_image_url = '../lib/minigalnano/createthumb.php?filename=' . IMG . '/persons/' . urlencode(urlencode($user_image)) . '&width=200';
                 }
                 ?>
-                <img src="<?= $user_image_url ?>" alt="Photo <?php echo $_SESSION['realname'] ?? ''; ?>">
+                <img src="<?= $user_image_url ?>" alt="Photo <?= $venom_realname ?>">
             </a>
             <span class="v-status" title="Online"></span>
         </div>
         <a href="<?php echo MWB.'system/app_user.php?changecurrent=true&action=detail'; ?>" class="s-user-meta subMenuItem">
-            <h4 class="s-user-name"><?php echo $_SESSION['realname'] ?? ''; ?></h4>
-            <span class="v-role"><?php echo isset($_SESSION['nname']) ? $_SESSION['nname'] : __('Librarian'); ?></span>
+            <h4 class="s-user-name"><?= $venom_realname ?></h4>
+            <span class="v-role"><?= $venom_role ?></span>
         </a>
     </div>
 
@@ -214,7 +230,7 @@ $venom_initmode = $venom_mode === 'auto' ? 'dark' : $venom_mode;
 
     <div class="v-nav" id="vNav">
         <?php echo $sub_menu; ?>
-        <div class="v-nav-empty" hidden><i class="fa fa-ghost"></i> <?= __('No menu matched.') ?></div>
+        <div class="v-nav-empty" hidden><i class="fa fa-search"></i> <?= __('No menu matched.') ?></div>
     </div>
 
     <div class="v-side-foot">
@@ -287,7 +303,7 @@ $venom_initmode = $venom_mode === 'auto' ? 'dark' : $venom_mode;
 <?php if ($venom_idle): ?>
 <div id="vIdle" class="v-idle" hidden>
     <div class="v-idle-box">
-        <div class="v-idle-icon"><i class="fa fa-hourglass-half"></i></div>
+        <div class="v-idle-icon"><i class="fa fa-clock-o"></i></div>
         <h3><?= __('Your session is about to expire') ?></h3>
         <p><?= __('For security reasons you will be signed out in') ?> <b id="vIdleCount">120</b> <?= __('seconds') ?>.</p>
         <div class="v-idle-actions">

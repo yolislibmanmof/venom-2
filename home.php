@@ -1,8 +1,12 @@
 <?php
 /**
  * ============================================================
- *  VENOM home.php v1.3.0 — GANTI TOTAL admin/admin_template/venom/home.php
+ *  VENOM home.php v1.3.2 — FINAL
+ *  Lokasi: admin/admin_template/VENOM/home.php
  *  v2 + grafik pengunjung mingguan + top peminjam + redraw saat accent ganti.
+ *
+ *  v1.3.2 (hasil audit): ikon FA 4.2.0, locale angka adaptif,
+ *  visitor null tampil —, catch fetch statistik, PHP_SELF json_encode.
  * ============================================================
  */
 
@@ -17,6 +21,7 @@ if (basename($_SERVER['PHP_SELF'] ?? '') === basename(__FILE__)) {
 
 $v_id  = stripos($sysconf['default_lang'] ?? '', 'id') === 0;
 $v_api = AWB . 'admin_template/' . basename(__DIR__) . '/api.php';
+$v_locale = $v_id ? 'id-ID' : str_replace('_', '-', $sysconf['default_lang'] ?? 'en-US');
 
 $vq = function ($sql) use ($dbs) {
     try { $r = $dbs->query($sql); return ($r && !empty($r->num_rows)) ? $r : null; }
@@ -195,7 +200,7 @@ $v_week_avg = $v_week_total > 0 ? round($v_week_total / 7, 1) : 0;
                 ['fa-archive', 'item_total_lent', __('Lent'), 'api', 'lent'],
                 ['fa-check', 'item_total_available', __('Available'), 'api', 'available'],
                 ['fa-users', '', __('Members'), $members_total, 'member'],
-                ['fa-address-book', '', __('Visitors Today'), $visitors_today, 'visitor'],
+                ['fa-sign-in', '', __('Visitors Today'), $visitors_today, 'visitor'],
             ];
             foreach ($v_stats as $s):
                 $pts = $v_sparks[$s[4]] ?? array_fill(0, 14, 0);
@@ -209,7 +214,8 @@ $v_week_avg = $v_week_total > 0 ? round($v_week_total / 7, 1) : 0;
                     <div class="card-body">
                         <div class="s-widget-icon"><i class="fa <?= $s[0] ?>"></i></div>
                         <?php if ($s[3] === 'api'): ?><div class="s-widget-value <?= $s[1] ?>">0</div>
-                        <?php else: ?><div class="s-widget-value v-counter" data-target="<?= (int)$s[3] ?>"><?= $s[3] === null ? '—' : '0' ?></div><?php endif; ?>
+                        <?php elseif ($s[3] === null): ?><div class="s-widget-value">—</div>
+                        <?php else: ?><div class="s-widget-value v-counter" data-target="<?= (int)$s[3] ?>">0</div><?php endif; ?>
                         <div class="s-widget-title"><?= $s[2] ?></div>
                         <canvas class="v-spark" data-points="<?= implode(',', $pts) ?>" height="34" aria-hidden="true"></canvas>
                     </div>
@@ -265,7 +271,7 @@ $v_week_avg = $v_week_total > 0 ? round($v_week_total / 7, 1) : 0;
                     <?php if ($v_week_total > 0): ?>
                     <div class="v-chart-box v-chart-sm"><canvas id="vWeekChart"></canvas></div>
                     <?php else: ?>
-                    <div class="v-empty"><i class="fa fa-address-book" style="display:block;font-size:26px;color:var(--v-muted);margin-bottom:8px;"></i><?= $v_id ? 'Belum ada kunjungan tercatat.' : __('No visits recorded yet.') ?></div>
+                    <div class="v-empty"><i class="fa fa-sign-in" style="display:block;font-size:26px;color:var(--v-muted);margin-bottom:8px;"></i><?= $v_id ? 'Belum ada kunjungan tercatat.' : __('No visits recorded yet.') ?></div>
                     <?php endif; ?>
                 </div></div>
             </div>
@@ -298,7 +304,7 @@ $v_week_avg = $v_week_total > 0 ? round($v_week_total / 7, 1) : 0;
                     <div class="v-quick">
                         <?php if (utility::havePrivilege('bibliography', 'w')): ?><a href="<?= MWB ?>bibliography/index.php?action=detail"><i class="fa fa-plus-circle"></i><?= __('Add Bibliography') ?></a><?php endif; ?>
                         <?php if (utility::havePrivilege('circulation', 'r')): ?><a href="<?= MWB ?>circulation/index.php"><i class="fa fa-exchange"></i><?= __('Circulation') ?></a><?php endif; ?>
-                        <?php if (utility::havePrivilege('membership', 'w')): ?><a href="<?= MWB ?>membership/index.php?action=detail"><i class="fa fa-user-plus"></i><?= __('Add Member') ?></a><?php endif; ?>
+                        <?php if (utility::havePrivilege('membership', 'w')): ?><a href="<?= MWB ?>membership/index.php?action=detail"><i class="fa fa-user"></i><?= __('Add Member') ?></a><?php endif; ?>
                         <?php if (utility::havePrivilege('stock_take', 'r')): ?><a href="<?= MWB ?>stock_take/index.php"><i class="fa fa-tasks"></i><?= __('Stock Take') ?></a><?php endif; ?>
                         <?php if (utility::havePrivilege('reporting', 'r')): ?><a href="<?= MWB ?>reporting/index.php"><i class="fa fa-bar-chart"></i><?= __('Reports') ?></a><?php endif; ?>
                         <?php if (utility::havePrivilege('system', 'r')): ?><a href="<?= MWB ?>system/index.php"><i class="fa fa-cog"></i><?= __('System') ?></a><?php endif; ?>
@@ -326,7 +332,7 @@ $v_week_avg = $v_week_total > 0 ? round($v_week_total / 7, 1) : 0;
             </div>
             <div class="col-12 col-md-6 col-xl-3 mb-3">
                 <div class="card border-0 h-100"><div class="card-body">
-                    <div class="v-section-title"><i class="fa fa-server"></i><?= $v_id ? 'Kesehatan Sistem' : __('System Health') ?></div>
+                    <div class="v-section-title"><i class="fa fa-hdd-o"></i><?= $v_id ? 'Kesehatan Sistem' : __('System Health') ?></div>
                     <div class="v-health-row"><span>SLiMS</span><b><?= defined('SENAYAN_VERSION_TAG') ? SENAYAN_VERSION_TAG : '-' ?></b></div>
                     <div class="v-health-row"><span>PHP</span><b><?= PHP_VERSION ?></b></div>
                     <div class="v-health-row"><span>MySQL</span><b><?= htmlspecialchars($db_version) ?></b></div>
@@ -362,7 +368,7 @@ $v_week_avg = $v_week_total > 0 ? round($v_week_total / 7, 1) : 0;
 <script src="<?php echo JWB ?>chartjs/Chart.min.js"></script>
 <script>
 $(function () {
-    var NF = new Intl.NumberFormat('id-ID');
+    var NF = new Intl.NumberFormat('<?= $v_locale ?>');
     var ISID = <?= $v_id ? 'true' : 'false' ?>;
     var VAPI = '<?= $v_api ?>';
     var ACCENT = (getComputedStyle(document.body).getPropertyValue('--v-accent') || '#00e57a').trim();
@@ -372,7 +378,14 @@ $(function () {
     var curDays = 7, vBar = null, vWeek = null, lastSum = null;
 
     function setNum(sel, val) { var el = document.querySelector(sel); if (window.Venom && Venom.countUp && el) Venom.countUp(el, val); else $(sel).text(NF.format(val)); }
-    async function getTotal(url, sel) { if (sel !== null) $(sel).text('…'); let r = await (await fetch(url, { headers: { 'SLiMS-Http-Cache': 'cache' } })).json(); if (sel !== null) setNum(sel, r.data); return r.data; }
+    async function getTotal(url, sel) {
+        if (sel !== null) $(sel).text('…');
+        try {
+            let r = await (await fetch(url, { headers: { 'SLiMS-Http-Cache': 'cache' } })).json();
+            if (sel !== null) setNum(sel, r.data);
+            return r.data;
+        } catch (e) { if (sel !== null) $(sel).text('—'); return null; }
+    }
     getTotal('<?= SWB ?>index.php?p=api/biblio/total/all', '.biblio_total_all');
     getTotal('<?= SWB ?>index.php?p=api/item/total/all', '.item_total_all');
     getTotal('<?= SWB ?>index.php?p=api/item/total/lent', '.item_total_lent');
@@ -431,6 +444,8 @@ $(function () {
         setNum('.loan_total', res.data.total); setNum('.loan_new', res.data.new); setNum('.loan_return', res.data.return);
         setNum('.loan_extend', res.data.extend); setNum('.loan_overdue', res.data.overdue);
         drawDoughnut(res.data);
+    }).catch(function () {
+        $('.loan_total, .loan_new, .loan_return, .loan_extend, .loan_overdue').text('—');
     });
 
     document.addEventListener('venom:accent', function () {
@@ -446,13 +461,13 @@ $(function () {
         $('#backupproc').click(function (e) {
             e.preventDefault(); var lbl = $(this).html();
             $(this).removeClass('btn-primary').addClass('btn-secondary disabled').html('<?= __('Please wait') ?>');
-            backupDatabase($(this).attr('href'), function (r) { if (r.status) window.location.href = '<?= $_SERVER['PHP_SELF'] ?>'; else { $('#backupproc').html(lbl); window.toastr.error(r.message, '<?= __('Error') ?>'); } });
+            backupDatabase($(this).attr('href'), function (r) { if (r.status) window.location.href = <?= json_encode($_SERVER['PHP_SELF']) ?>; else { $('#backupproc').html(lbl); window.toastr.error(r.message, '<?= __('Error') ?>'); } });
         });
         <?php endif; ?>
         function backupDatabase(href, cb) { $.post(href, { start: true, tkn: '<?= $_SESSION['token'] ?? '' ?>', verbose: 'no', response: 'json' }, function (r) { cb(JSON.parse(r)); }); }
         <?php if (!$is_repaired && !$alreadyBackup && config('database_backup.auto')): ?>
         $('.contentDesc').slideUp(); $('#backupProccess').slideDown();
-        backupDatabase('<?= MWB . 'system/backup_proc.php' ?>', function (r) { if (r.status) window.location.href = '<?= $_SERVER['PHP_SELF'] ?>'; else window.toastr.error(r.message, '<?= __('Error') ?>'); });
+        backupDatabase('<?= MWB . 'system/backup_proc.php' ?>', function (r) { if (r.status) window.location.href = <?= json_encode($_SERVER['PHP_SELF']) ?>; else window.toastr.error(r.message, '<?= __('Error') ?>'); });
         <?php endif; ?>
     <?php endif; ?>
 

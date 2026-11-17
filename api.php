@@ -1,8 +1,16 @@
 <?php
 /**
  * ============================================================
- *  VENOM api.php v1.3.0 — GANTI TOTAL admin/admin_template/venom/api.php
+ *  VENOM api.php v1.3.2 — FINAL
+ *  Lokasi: admin/admin_template/VENOM/api.php
  *  actions: series | notifications | catalog
+ *
+ *  v1.3.2 (hasil audit):
+ *  - S3: gate privilege per-action. notifications = circulation r,
+ *    catalog = bibliography r. 'series' tetap terbuka: hanya agregat
+ *    angka yang sudah ditampilkan dashboard ke semua staf.
+ *  - Escape wildcard LIKE (% dan _) pada pencarian katalog.
+ *  - Respons tolak tetap JSON (+HTTP 403) agar fetch JS tidak error.
  * ============================================================
  */
 
@@ -18,6 +26,16 @@ header('Cache-Control: no-store');
 
 $action = isset($_GET['action']) ? preg_replace('/[^a-z_]/', '', (string)$_GET['action']) : '';
 $v_id   = stripos($sysconf['default_lang'] ?? '', 'id') === 0;
+
+/* ===== S3: pagar privilege modul (fail-closed) ===== */
+function v_can($mod) {
+    return method_exists('utility', 'havePrivilege') ? (bool)utility::havePrivilege($mod, 'r') : false;
+}
+function v_forbid($extra = []) {
+    http_response_code(403);
+    echo json_encode(array_merge(['ok' => false, 'error' => 'forbidden'], $extra));
+    exit;
+}
 
 function v_rows($sql) {
     global $dbs;
@@ -56,6 +74,7 @@ if ($action === 'series') {
 }
 
 if ($action === 'notifications') {
+    if (!v_can('circulation')) { v_forbid(['groups' => [], 'total' => 0]); }
     $groups = [];
     $dueCount = (int)(v_val("SELECT COUNT(*) c FROM loan WHERE is_lent=1 AND is_return=0 AND due_date = CURDATE()")['c'] ?? 0);
     $dueItems = v_rows("SELECT m.member_name t, CONCAT(COALESCE(b.title, l.item_code), ' · ', l.item_code) s
@@ -90,9 +109,10 @@ if ($action === 'notifications') {
 }
 
 if ($action === 'catalog') {
+    if (!v_can('bibliography')) { v_forbid(['items' => []]); }
     $q = trim((string)($_GET['q'] ?? ''));
     if (mb_strlen($q) < 2) { echo json_encode(['ok' => true, 'items' => []]); exit; }
-    $esc = $dbs->escape_string($q);
+    $esc = str_replace(['%', '_'], ['\\%', '\\_'], $dbs->escape_string($q));
     $rows = v_rows("SELECT biblio_id, title, publish_year, publisher FROM biblio
         WHERE title LIKE '%$esc%' OR isbn_issn LIKE '%$esc%' ORDER BY last_update DESC LIMIT 8");
     $items = [];
