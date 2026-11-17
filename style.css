@@ -1,8 +1,11 @@
 /* ============================================================
-   VENOM v1.2.0 FINAL — Premium Admin Template SLiMS 9 (Bulian)
-   GANTI TOTAL isi style.css dengan file ini.
-   Merge: v1.1.0 + QA v1.1.1 + perbaikan kontras tombol disabled,
-   surface tabel/iframe sirkulasi, color-scheme native control.
+   VENOM v1.3.2 FINAL — Premium Admin Template SLiMS 9 (Bulian)
+   Merge: v1.1.0 + QA v1.1.1 + kontras tombol disabled,
+   surface tabel/iframe sirkulasi, color-scheme native control,
+   dashboard v2, v1.3.0 (favorit/palette/cheatsheet/accent),
+   v1.3.1 uniform readability.
+   v1.3.2: hover disabled adaptif, gradien accent-aware,
+   fallback color-mix, #topicID auto, chat light-mode.
    ============================================================ */
 @import "css/font-awesome.min.css";
 
@@ -158,11 +161,11 @@ body.v-rail #mainContent, body.v-rail footer { margin-left: var(--v-rail-w); }
 .v-burger { display: none; }
 
 /* ---------- 5. CRUMBS & CONTENT ---------- */
-.v-crumbs { position: fixed; top: var(--v-head-h); left: var(--v-side-w); right: 0; z-index: 40; height: var(--v-crumb-h); display: flex; align-items: center; gap: 8px; padding: 0 24px; font-size: 11px; font-weight: 600; color: var(--v-muted); background: color-mix(in srgb, var(--v-panel) 72%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--v-line-soft); transition: left .28s var(--v-ease); white-space: nowrap; overflow: hidden; }
+.v-crumbs { position: fixed; top: var(--v-head-h); left: var(--v-side-w); right: 0; z-index: 40; height: var(--v-crumb-h); display: flex; align-items: center; gap: 8px; padding: 0 24px; font-size: 11px; font-weight: 600; color: var(--v-muted); background: var(--v-panel); background: color-mix(in srgb, var(--v-panel) 72%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--v-line-soft); transition: left .28s var(--v-ease); white-space: nowrap; overflow: hidden; }
 .v-crumbs .fa-home { color: var(--v-accent); }
 .v-crumbs .fa-angle-right { font-size: 10px; opacity: .6; }
 .v-crumbs #vCrumbPage { color: var(--v-accent); font-weight: 700; overflow: hidden; text-overflow: ellipsis; }
-#mainContent { position: relative; overflow: hidden; margin-left: var(--v-side-w); margin-top: calc(var(--v-head-h) + var(--v-crumb-h)); padding: 20px 24px 48px; min-height: calc(100vh - var(--v-head-h) - var(--v-crumb-h) - 70px); background: transparent; transition: margin-left .28s var(--v-ease); animation: vFadeUp .55s var(--v-ease) both; }
+#mainContent { position: relative; overflow: hidden; margin-left: var(--v-side-w); margin-top: calc(var(--v-head-h) + var(--v-crumb-h)); padding: 20px 24px 48px; min-height: calc(100vh - var(--v-head-h) - var(--v-crumb-h) - 70px); background: transparent; transition: margin-left .28s var(--v-ease); animation: vFadeUp .55s var(--v-ease) backwards; }
 #pageContent { padding: 15px; }
 .menuBox { position: relative; }
 .per_title { padding: 16px 18px; border-bottom: 1px solid var(--v-line-soft); position: relative; }
@@ -183,7 +186,7 @@ body.v-rail #mainContent, body.v-rail footer { margin-left: var(--v-rail-w); }
 .ajax-loading { padding: 52px 20px; text-align: center; }
 .ajax-loading .spinner-border { color: var(--v-accent) !important; }
 .ajax-loading .text-muted { color: var(--v-muted) !important; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; }
-.ajax-loading::after { content: ''; display: block; width: 220px; height: 4px; margin: 18px auto 0; border-radius: 4px; background: linear-gradient(90deg, transparent, var(--v-accent), transparent); background-size: 200% 100%; animation: vShimmer 1.2s linear infinite; }
+.ajax-loading::after { content: ''; display: block; width: 220px; height: 4px; margin: 18px auto 0; border-radius: 3px; background: linear-gradient(90deg, transparent, var(--v-accent), transparent); background-size: 200% 100%; animation: vShimmer 1.2s linear infinite; }
 
 /* ---------- 6. CARDS / PANELS / WIDGETS ---------- */
 .card { background: var(--v-panel); border: 1px solid var(--v-line-soft) !important; border-radius: var(--v-radius) !important; box-shadow: 0 6px 24px rgba(0,0,0,.22); transition: border-color .2s, transform .2s, box-shadow .2s; }
@@ -263,7 +266,7 @@ input[id*='simbio-checkbox-'], label[for*='simbio-checkbox-'] { cursor: pointer 
 .btn:hover { transform: translateY(-1px); }
 .btn:active { transform: translateY(0); }
 .btn-sm { font-size: 10px; padding: 5px 9px; }
-.btn-primary, .editFormLink { color: var(--v-ink) !important; border: 1px solid transparent; background: linear-gradient(135deg, var(--v-accent), #00b862); box-shadow: 0 4px 16px rgba(0,229,122,.25); }
+.btn-primary, .editFormLink { color: var(--v-ink) !important; border: 1px solid transparent; background: linear-gradient(135deg, var(--v-accent), #00b862); background: linear-gradient(135deg, var(--v-accent), color-mix(in srgb, var(--v-accent) 85%, #000)); box-shadow: 0 4px 16px rgba(0,229,122,.25); }
 .btn-primary:hover, .editFormLink:hover { box-shadow: var(--v-glow), 0 6px 20px rgba(0,229,122,.3); color: var(--v-ink) !important; filter: brightness(1.06); }
 .btn-default, .btn-secondary { color: var(--v-text); background: var(--v-panel-2); border: 1px solid var(--v-line-soft); }
 .btn-default:hover, .btn-secondary:hover { color: var(--v-accent); border-color: var(--v-accent); background: var(--v-tint); }
@@ -272,14 +275,14 @@ input[id*='simbio-checkbox-'], label[for*='simbio-checkbox-'] { cursor: pointer 
 .btn-warning { color: #241500; background: linear-gradient(135deg, #ffb020, #f59e0b); border: none; }
 .btn-info { color: #03222f; background: linear-gradient(135deg, #38bdf8, #0ea5e9); border: none; }
 .btn-success:hover, .btn-danger:hover, .btn-warning:hover, .btn-info:hover { filter: brightness(1.08); color: inherit; }
-/* Disabled TETAP terbaca tajam (Sunting dll): teks terang, border dashed, tanpa opacity bootstrap */
+/* Disabled TETAP terbaca (Sunting dll): teks adaptif dark/light, border dashed, tanpa opacity bootstrap */
 .btn:disabled, .btn.disabled, .btn[disabled], a.btn[disabled], button[disabled].btn,
 .editFormLink[disabled], .editFormLink.disabled, input[disabled].btn {
   opacity: 1 !important; filter: none !important; box-shadow: none !important; transform: none !important;
   color: var(--v-muted) !important; background: var(--v-panel-2) !important;
   border: 1px dashed var(--v-line) !important; cursor: not-allowed;
 }
-.btn:disabled:hover, .editFormLink[disabled]:hover { color: #d9ebe1 !important; background: var(--v-panel-2) !important; border-color: var(--v-line) !important; }
+.btn:disabled:hover, .editFormLink[disabled]:hover { color: var(--v-muted) !important; background: var(--v-panel-2) !important; border-color: var(--v-line) !important; }
 .s-btn { margin-right: 3px; }
 .s-export { padding: 15px 0; }
 .editLink { color: var(--v-text); display: block; position: relative; }
@@ -319,7 +322,7 @@ input[id*='simbio-checkbox-'], label[for*='simbio-checkbox-'] { cursor: pointer 
 .chzn-container-multi .chzn-choices li.search-field input[type="text"] { background: transparent !important; color: var(--v-text) !important; height: auto; padding: 4px 2px; box-shadow: none; }
 .chzn-container-multi .chzn-choices li.search-choice { background: var(--v-tint); background-image: none; border: 1px solid var(--v-line); color: var(--v-text); border-radius: 6px; box-shadow: none; padding: 4px 20px 4px 8px; }
 .chzn-container-multi .chzn-choices li.search-choice .search-choice-close { filter: invert(.65); }
-.chzn-container-active .chzn-choices { border-color: var(--v-accent) !important; box-shadow: 0 0 0 3px color-mix(in srgb, var(--v-accent) 18%, transparent) !important; }
+.chzn-container-active .chzn-choices { border-color: var(--v-accent) !important; box-shadow: 0 0 0 3px rgba(0,229,122,.15) !important; box-shadow: 0 0 0 3px color-mix(in srgb, var(--v-accent) 18%, transparent) !important; }
 .chzn-container-multi .chzn-drop { background: var(--v-panel); }
 .chzn-container-multi .chzn-drop .chzn-results li { color: var(--v-text); }
 .chzn-container-multi .chzn-drop .chzn-results .highlighted { background: var(--v-tint); color: var(--v-accent); }
@@ -384,7 +387,7 @@ details.debug iframe { background: #fff; }
 /* ---------- 11. MODULE BITS ---------- */
 .s-biblio__cover { float: right; margin-top: -78px; margin-right: 0; border-radius: 8px; }
 .s-biblio__cover img { height: 78px; border: none !important; border-radius: 8px; box-shadow: var(--v-shadow); }
-#topicID { list-style: none; line-height: 2em; margin: 15px 0; padding: 10px; border: 1px solid var(--v-line-soft); border-radius: 10px; min-height: 100px; max-height: 110px; overflow: scroll; background: var(--v-panel-2); }
+#topicID { list-style: none; line-height: 2em; margin: 15px 0; padding: 10px; border: 1px solid var(--v-line-soft); border-radius: 10px; min-height: 100px; max-height: 110px; overflow: auto; background: var(--v-panel-2); }
 .authors { font-size: 10pt; color: var(--v-muted); font-style: italic; }
 .title { color: var(--v-text); font-weight: 700; }
 .keytip { position: absolute; right: 0; font-size: 10px; margin: 0; color: var(--v-muted); }
@@ -630,10 +633,10 @@ body[data-venom-fx="0"] { --v-glow: none; }
 .v-period { display: inline-flex; gap: 4px; margin-left: auto; }
 .v-period button { font: 700 10px var(--v-mono); letter-spacing: .5px; color: var(--v-muted); background: var(--v-panel-2); border: 1px solid var(--v-line-soft); border-radius: 999px; padding: 4px 11px; cursor: pointer; transition: all .18s var(--v-ease); }
 .v-period button:hover { color: var(--v-accent); border-color: var(--v-accent); }
-.v-period button.active { color: var(--v-ink); background: linear-gradient(135deg, var(--v-accent), #00b862); border-color: transparent; box-shadow: var(--v-glow); }
+.v-period button.active { color: var(--v-ink); background: linear-gradient(135deg, var(--v-accent), #00b862); background: linear-gradient(135deg, var(--v-accent), color-mix(in srgb, var(--v-accent) 85%, #000)); border-color: transparent; box-shadow: var(--v-glow); }
 .v-chart-box { position: relative; height: 294px; }
 .v-chart-box canvas { width: 100% !important; height: 100% !important; }
-.v-chart-box.loading::after { content: ''; position: absolute; inset: 0; border-radius: 10px; background: color-mix(in srgb, var(--v-panel) 70%, transparent); backdrop-filter: blur(2px); }
+.v-chart-box.loading::after { content: ''; position: absolute; inset: 0; border-radius: 10px; background: var(--v-panel); background: color-mix(in srgb, var(--v-panel) 70%, transparent); backdrop-filter: blur(2px); }
 .v-chart-box.loading::before { content: ''; position: absolute; left: 50%; top: 50%; width: 26px; height: 26px; margin: -13px 0 0 -13px; z-index: 1; border-radius: 50%; border: 3px solid var(--v-line); border-top-color: var(--v-accent); animation: vSpin .8s linear infinite; }
 @keyframes vSpin { to { transform: rotate(360deg); } }
 
@@ -784,3 +787,10 @@ body[data-venom-mode="light"] #pageContent .dataListHeader td,
 body[data-venom-mode="light"] #pageContent .dataListHeaderPrinted td {
   color: #4a5f53 !important;
 }
+
+/* ============================================================
+   VENOM v1.3.2 — F4: warna chat slot terang khusus light mode
+   (di dark mode tetap #e5e7eb seperti aslinya)
+   ============================================================ */
+body[data-venom-mode="light"] .c5, body[data-venom-mode="light"] .c10,
+body[data-venom-mode="light"] .c15, body[data-venom-mode="light"] .c20 { color: #475569 !important; }
