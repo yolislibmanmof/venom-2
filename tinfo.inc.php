@@ -5,6 +5,13 @@
  *  tinfo.inc.php — opsi template, skema identik default.
  *  Disimpan per-user oleh system/theme.php (user.admin_template)
  *  dan di-merge ke $sysconf['admin_template'] oleh utility::loadUserTemplate().
+ *
+ *  v1.1.0 — PATCH ANTI-RESET (additif, tanpa menghapus fitur lama):
+ *  Core system/theme.php branch simpan (updateData) membangun $data
+ *  dari identitas GLOBAL ('default') tanpa memanggil loadUserTemplate().
+ *  tinfo.inc.php di-include SEBELUM $data dibangun, maka identitas
+ *  template dikunci ke folder ini di sini -> kustomisasi tidak lagi
+ *  mereset tampilan ke default. Bonus: auto-reload setelah simpan.
  * ============================================================
  */
 
@@ -18,6 +25,21 @@ if (class_exists(Memory::class)) {
 }
 if (!$options_languages) {
     $options_languages = [['en_US', 'English'], ['id_ID', 'Indonesia']];
+}
+
+/* ============================================================
+ *  PATCH ANTI-RESET v1.0 (additif — jangan hapus kode lama)
+ *  Bug inti SLiMS 9.8: system/theme.php branch simpan (updateData)
+ *  membangun $data dari $sysconf['admin_template']['theme'/'css']
+ *  GLOBAL (= 'default') tanpa memanggil loadUserTemplate().
+ *  Akibat: user.admin_template tertulis theme=default -> reload
+ *  kembali ke template default. tinfo.inc.php di-include SEBELUM
+ *  $data dibangun, jadi kita kunci identitas ke folder ini di sini.
+ * ============================================================ */
+if (isset($_POST['updateData']) || isset($_GET['customize'])) {
+    $venom_dir = basename(__DIR__); // otomatis = 'venom', ikut nama folder
+    $sysconf['admin_template']['theme'] = $venom_dir;
+    $sysconf['admin_template']['css']   = $sysconf['admin_template']['dir'] . '/' . $venom_dir . '/style.css';
 }
 
 $venom_options = [
@@ -92,8 +114,7 @@ $venom_options = [
         'default' => $sysconf['admin_template']['always_show_tracks'] ?? 1,
         'data'    => [[1, __('Yes')], [0, __('No')]],
     ],
-
-        'particles' => [
+    'particles' => [
         'dbfield' => 'venom_particles',
         'label'   => __('Background Particle Effect'),
         'type'    => 'dropdown',
@@ -105,3 +126,20 @@ $venom_options = [
 // Daftar untuk folder 'venom' DAN theme aktif (kompatibel dgn theme.php & sysconfig).
 $sysconf['admin_template']['option']['venom'] = $venom_options;
 $sysconf['admin_template']['option'][$sysconf['admin_template']['theme']] = $venom_options;
+
+/* ============================================================
+ *  BONUS AUTO-RELOAD v1.0 (additif — blok ini opsional)
+ *  Core SLiMS hanya menampilkan toast "reload manual" setelah
+ *  simpan kustomisasi. Blok ini membuat jendela induk reload
+ *  otomatis +/- 1,2 detik setelah simpan berhasil. Hanya dicetak
+ *  di popup form (GET customize), TIDAK saat POST simpan, sehingga
+ *  respons AJAX tetap bersih. Vanilla JS, tanpa dependensi jQuery.
+ * ============================================================ */
+if (isset($_GET['customize']) && !isset($_POST['updateData'])) {
+    echo "\n<script>(function(){var O=XMLHttpRequest.prototype.open,S=XMLHttpRequest.prototype.send;"
+        ."XMLHttpRequest.prototype.open=function(m,u){this.__vM=m;this.__vU=u;return O.apply(this,arguments);};"
+        ."XMLHttpRequest.prototype.send=function(b){var x=this;"
+        ."if(String(x.__vM||'').toUpperCase()==='POST'&&String(x.__vU||'').indexOf('theme.php')>-1&&String(b||'').indexOf('updateData')>-1){"
+        ."x.addEventListener('load',function(){setTimeout(function(){try{parent.location.reload();}catch(e){location.reload();}},1200);});}"
+        ."return S.apply(this,arguments);};})();</script>\n";
+}
