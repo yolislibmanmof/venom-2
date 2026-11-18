@@ -299,6 +299,7 @@
         { g: L('Commands', 'Perintah'), t: L('Toggle fullscreen', 'Layar penuh'), i: 'fa-expand', run: () => Venom.toggleFullscreen && Venom.toggleFullscreen() },
         { g: L('Commands', 'Perintah'), t: L('Keyboard shortcuts', 'Pintasan keyboard'), i: 'fa-keyboard-o', k: '?', run: () => Venom.keys && Venom.keys.open() },
         { g: L('Commands', 'Perintah'), t: L('Accent presets', 'Preset accent'), i: 'fa-tint', run: () => Venom.accentPop && Venom.accentPop.toggle() },
+        { g: L('Commands', 'Perintah'), t: L('Background particle settings', 'Setelan partikel latar'), i: 'fa-asterisk', k: 'Alt+P', run: () => window.VenomParticles && VenomParticles.toggleLab() },
         { g: L('Commands', 'Perintah'), t: L('Reload current content', 'Muat ulang konten'), i: 'fa-refresh', run: () => { var c = qs('#sidepan a.curModuleLink'); if (c) c.click(); else location.reload(); } },
         { g: L('Commands', 'Perintah'), t: L('Open OPAC (new tab)', 'Buka OPAC (tab baru)'), i: 'fa-globe', run: () => { var o = qs('#mainMenu a.opac'); window.open(o ? o.getAttribute('href') : (C.swb || '../') + 'index.php', '_blank', 'noopener'); } },
         { g: L('Commands', 'Perintah'), t: L('Logout', 'Keluar'), i: 'fa-sign-out', run: () => { if (confirm(L('Logout from VENOM?', 'Keluar dari VENOM?'))) { var l = qs('#mainMenu a.logout'); location.href = l ? l.getAttribute('href') : 'logout.php'; } } }
@@ -369,6 +370,7 @@
         [['Alt', 'M'], L('Collapse / expand sidebar', 'Ciutkan / lebarkan sidebar')],
         [['Alt', 'L'], L('Toggle dark / light', 'Ganti gelap / terang')],
         [['Alt', 'N'], L('Notifications', 'Notifikasi')],
+        [['Alt', 'P'], L('Particle field settings', 'Setelan partikel latar')],
         [['Esc'], L('Close panel / modal', 'Tutup panel / modal')],
         [['Alt', '←'], L('Back (AJAX history)', 'Kembali (riwayat AJAX)')],
         [['Alt', 'R'], L('Reload page', 'Muat ulang halaman')]

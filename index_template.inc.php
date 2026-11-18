@@ -33,6 +33,7 @@ $venom_clock   = (int)($venom_at['venom_clock'] ?? 1);
 $venom_palette = (int)($venom_at['venom_palette'] ?? 1);
 $venom_idle    = (int)($venom_at['venom_idle'] ?? 1);
 $venom_tracks  = (int)($venom_at['always_show_tracks'] ?? 1);
+$venom_particles = (int)($venom_at['venom_particles'] ?? 1);
 $venom_timeout = (int)($sysconf['session_timeout'] ?? 7200);
 $venom_turl    = $sysconf['admin_template']['dir'] . '/' . $sysconf['admin_template']['theme'];
 $venom_ver     = '1.3.2';
@@ -102,12 +103,12 @@ $venom_role     = htmlspecialchars($_SESSION['nname'] ?? __('Librarian'), ENT_QU
     <script type="text/javascript" src="<?php echo JWB; ?>toastr/toastr.min.js"></script>
     <script type="text/javascript" src="<?php echo JWB; ?>datepicker/js/datepicker-full.min.js"></script>
     <script type="text/javascript" src="<?php echo JWB; ?>/croppie/croppie.js"></script>
-    <?php if (file_exists(SB . 'js/datepicker/js/locales/' . substr($sysconf['default_lang'], 0, 2) . '.js')): ?>
-    <script type="text/javascript" src="<?php echo JWB; ?>datepicker/js/locales/<?= substr($sysconf['default_lang'], 0, 2) ?>.js"></script>
+    <?php if (file_exists(SB . 'js/datepicker/js/locales/' . substr($sysconf['default_lang'] ?? 'en_US', 0, 2) . '.js')): ?>
+    <script type="text/javascript" src="<?php echo JWB; ?>datepicker/js/locales/<?= substr($sysconf['default_lang'] ?? 'en_US', 0, 2) ?>.js"></script>
     <?php endif; ?>
     <script type="text/javascript" src="<?php echo $venom_turl; ?>/js/smooth-scrollbar.js"></script>
     <script type="text/javascript" src="<?php echo $venom_turl; ?>/js/overscroll.js"></script>
-    <?php if ($sysconf['chat_system']['enabled']) : ?>
+    <?php if (!empty($sysconf['chat_system']['enabled'])) : ?>
     <script src="<?php echo JWB; ?>fancywebsocket.js"></script>
     <?php endif; ?>
 
@@ -123,6 +124,8 @@ $venom_role     = htmlspecialchars($_SESSION['nname'] ?? __('Librarian'), ENT_QU
         'clock'   => $venom_clock,
         'palette' => $venom_palette,
         'idle'    => $venom_idle,
+        'particles' => $venom_particles,
+        'pfx'     => $venom_at['venom_pfx'] ?? '',
         'timeout' => $venom_timeout,
         'uid'     => (int)($_SESSION['uid'] ?? 0),
         'locale'  => str_replace('_', '-', $sysconf['default_lang'] ?? 'id_ID'),
@@ -130,7 +133,7 @@ $venom_role     = htmlspecialchars($_SESSION['nname'] ?? __('Librarian'), ENT_QU
         'library' => $sysconf['library_name'] ?? 'SLiMS',
         'awb'     => AWB, 'swb' => SWB, 'mwb' => MWB,
         'turl'    => $venom_turl,
-    ], JSON_UNESCAPED_SLASHES) ?>;
+    ], JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
     </script>
     <script type="text/javascript" src="<?php echo $venom_turl; ?>/js/venom.js?v=<?php echo $venom_asset('js/venom.js'); ?>"></script>
     <script type="text/javascript" src="<?php echo $venom_turl; ?>/js/venom-particles.js?v=<?php echo $venom_asset('js/venom-particles.js'); ?>"></script>
